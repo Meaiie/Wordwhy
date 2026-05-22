@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Vocab Notebook</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Vocabulary Notebook</h1>
+        </header>
+
+        <section class="card">
+            <h2>เพิ่มคำศัพท์ใหม่</h2>
+            <form id="addWordForm">
+                <input type="text" id="word" placeholder="คำศัพท์" required>
+                <input type="text" id="type" placeholder="หน้าที่ (เช่น n., v.)" required>
+                <input type="text" id="meaning" placeholder="ความหมาย" required>
+                <button type="submit" class="btn-primary">Add</button>
+            </form>
+            <p id="statusMsg" class="status-message hidden">กำลังบันทึก...</p>
+        </section>
+
+        <section class="card text-center">
+            <h2>สุ่มทายคำศัพท์</h2>
+            <div class="flip-card" id="flipCard">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front">
+                        <p class="hint">คลิกเพื่อดูความหมาย</p>
+                        <h3 id="quizWord">Loading...</h3>
+                        <span id="quizType"></span>
+                    </div>
+                    <div class="flip-card-back">
+                        <p class="hint">ความหมาย</p>
+                        <h3 id="quizMeaning">...</h3>
+                    </div>
+                </div>
+            </div>
+            <button id="randomBtn" class="btn-secondary">สุ่มคำใหม่</button>
+        </section>
+
+        <section class="card table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>คำศัพท์</th>
+                        <th>หน้าที่</th>
+                        <th>ความหมาย</th>
+                    </tr>
+                </thead>
+                <tbody id="wordList">
+                    </tbody>
+            </table>
+        </section>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
