@@ -63,32 +63,27 @@ document.getElementById('addWordForm').addEventListener('submit', async (e) => {
     // แสดงสถานะกำลังบันทึก
     statusMsg.textContent = "กำลังบันทึกข้อมูล...";
     statusMsg.classList.remove('hidden');
+    statusMsg.style.color = "var(--text-muted)";
 
     try {
         await fetch(API_URL, {
             method: 'POST',
             body: JSON.stringify({ word, type, meaning }),
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' } // ใช้ text/plain เพื่อเลี่ยงปัญหา CORS
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' } 
         });
         
-        statusMsg.textContent = "บันทึกคำศัพท์สำเร็จ!";
-        statusMsg.style.color = "#4CAF50"; // เปลี่ยนสีข้อความเป็นสีเขียว
+        // ซ่อนข้อความ "กำลังบันทึก" 
+        statusMsg.classList.add('hidden');
+        
+        // --- จุดที่เพิ่มใหม่: ให้หน้าต่างเด้งขึ้นมาบอก! ---
+        alert(`สำเร็จแล้ว! จำเพิ่มได้ 1 คำ จำได้แน่แกกกก คำที่: "${word}" ✌️✨`);
         
         // ล้างข้อมูลในฟอร์มและดึงข้อมูลใหม่มาแสดง
         document.getElementById('addWordForm').reset();
         fetchData(); 
         
-        // ซ่อนข้อความแจ้งเตือนหลังจาก 3 วินาที
-        setTimeout(() => {
-            statusMsg.classList.add('hidden');
-            statusMsg.style.color = "var(--text-muted)"; // คืนค่าสีเดิม
-        }, 3000);
-        
     } catch (error) {
         statusMsg.textContent = "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง";
-        statusMsg.style.color = "#F44336"; // สีแดงเมื่อเกิดข้อผิดพลาด
+        statusMsg.style.color = "#F44336"; 
     }
 });
-
-// โหลดข้อมูลทันทีเมื่อเปิดหน้าเว็บ
-fetchData();
