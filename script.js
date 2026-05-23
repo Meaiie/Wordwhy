@@ -112,11 +112,40 @@ document.getElementById('addWordForm').addEventListener('submit', async (e) => {
         statusMsg.classList.add('hidden');
         
         // --- จุดที่เพิ่มใหม่: ให้หน้าต่างเด้งขึ้นมาบอก! ---
-        alert(`สำเร็จแล้ว! จำเพิ่มได้ 1 คำ จำได้แน่แกกกก คำที่: "${word}" ✌️✨`);
+// ซ่อนข้อความ "กำลังบันทึก" 
+        statusMsg.classList.add('hidden');
         
+        // --- เริ่มระบบ ป๊อปอัป + นับคำ + จุดพลุ ---
+        
+        // คำนวณว่าเป็นคำที่เท่าไหร่ (เอาจำนวนคำที่มีอยู่เดิม + 1)
+        const wordCount = vocabData.length + 1; 
+
+        // ดึงกล่อง Modal มาใช้งาน
+        const modal = document.getElementById('successModal');
+        const modalMsg = document.getElementById('modalMessage');
+        
+        // ใส่ข้อความนับคำศัพท์เข้าไป
+        modalMsg.innerHTML = `สำเร็จแล้ว! จำได้แน่แกกก<br>นี่คือ <strong>คำที่ ${wordCount}</strong> ของเราแล้วนะ!<br><br>คำศัพท์: <strong style="color: var(--primary-color); font-size: 1.3rem;">"${word}"</strong> ✌️✨`;
+        
+        // โชว์ป๊อปอัป
+        modal.classList.add('show');
+        
+        // สั่งจุดพลุ Confetti!
+        confetti({
+            particleCount: 150,
+            spread: 70,
+            origin: { y: 0.6 }
+        });
+
+        // จัดการปุ่ม "ลุยต่อ!" เพื่อปิดป๊อปอัป
+        document.getElementById('closeModalBtn').addEventListener('click', () => {
+            modal.classList.remove('show');
+        });
+        // --- จบระบบป๊อปอัป ---
+
         // ล้างข้อมูลในฟอร์มและดึงข้อมูลใหม่มาแสดง
         document.getElementById('addWordForm').reset();
-        fetchData(); 
+        fetchData();
         
     } catch (error) {
         statusMsg.textContent = "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง";
