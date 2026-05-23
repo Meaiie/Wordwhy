@@ -1,61 +1,110 @@
-// >>> เปลี่ยน URL ด้านล่างนี้เป็น Web App URL ของคุณ <<<
-const API_URL = 'https://script.google.com/macros/s/AKfycbwbDgsW4bLZSUr_wUjeN7Mavf47hYajTw3aNs0xPCInwNAUi47UDQp_26Fdd4vjkDlZ/exec'; 
+const API_URL = 'https://script.google.com/macros/s/AKfycbwbDgsW4bLZSUr_wUjeN7Mavf47hYajTw3aNs0xPCInwNAUi47UDQp_26Fdd4vjkDlZ/exec';
 
 let vocabData = [];
+let currentPage = 1;   // หน้าปัจจุบัน
+const rowsPerPage = 10; // ตั้งค่าให้แสดงหน้าละ 10 คำ
 
-// ฟังก์ชันดึงข้อมูลจาก Google Sheets
+// ฟังก์ชันดึงข้อมูลจาก Google Sheets (อัปเดตแก้ปัญหาโหลดช้า/ไม่ขึ้นตอนรีเฟรช)
 async function fetchData() {
     try {
-        const response = await fetch(API_URL);
+        // ใส่ ?t=${Date.now()} ห้อยท้ายเพื่อเคลียร์ Cache บังคับดึงข้อมูลใหม่เอี่ยมเสมอ
+        const response = await fetch(`${API_URL}?t=${Date.now()}`);
         vocabData = await response.json();
+        
+        // แสดงตารางและสุ่มคำถาม
         renderList();
         pickRandomWord();
     } catch (error) {
         console.error('Error fetching data:', error);
+        document.getElementById('wordList').innerHTML = `<tr><td colspan="3" style="text-align: center; color: #F44336;">โหลดข้อมูลไม่สำเร็จ กรุณารีเฟรชอีกครั้ง</td></tr>`;
     }
 }
 
-// ฟังก์ชันแสดงรายการคำศัพท์ในตาราง
+// ฟังก์ชันแสดงรายการคำศัพท์แบบแบ่งหน้า (Pagination)
 function renderList() {
     const list = document.getElementById('wordList');
-    // .slice().reverse() เพื่อให้คำศัพท์ล่าสุดขึ้นก่อน
-    list.innerHTML = vocabData.slice().reverse().map(item => `
+    const prevBtn = document.getElementById('prevPageBtn');
+    const nextBtn = document.getElementById('nextPageBtn');
+    const pageInfo = document.getElementById('pageInfo');
+
+    if (!vocabData || vocabData.length === 0) {
+        list.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--text-muted);">ยังไม่มีคำศัพท์ในระบบ แอดคำแรกได้เลย!</td></tr>`;
+        prevBtn.disabled = true;
+        nextBtn.disabled = true;
+        pageInfo.textContent = "หน้า 1 จาก 1";
+        return;
+    }
+
+    // กลับด้านข้อมูลเพื่อให้คำศัพท์ใหม่ล่าสุดขึ้นก่อน
+    const reversedData = vocabData.slice().reverse();
+    
+    // คำนวณจำนวนหน้าทั้งหมด
+    const totalPages = Math.ceil(reversedData.length / rowsPerPage);
+    
+    // คุมไม่ให้หน้าปัจจุบันเกินขอบเขตที่มีจริง
+    if (currentPage > totalPages) currentPage = totalPages;
+    if (currentPage < 1) currentPage = 1;
+
+    // หาจุดเริ่มต้นและจุดสิ้นสุดของข้อมูลในหน้านั้นๆ (ทีละ 10 คำ)
+    const startIndex = (currentPage - 1) * rowsPerPage;
+    const endIndex = startIndex + rowsPerPage;
+    const pageData = reversedData.slice(startIndex, endIndex);
+
+    // เรนเดอร์ข้อมูลลงในตาราง
+    list.innerHTML = pageData.map(item => `
         <tr>
             <td><strong>${item.word}</strong></td>
             <td style="color: var(--text-muted); font-style: italic;">${item.type}</td>
             <td>${item.meaning}</td>
         </tr>
     `).join('');
+
+    // อัปเดตข้อความบอกเลขหน้า และสถานะของปุ่ม ก่อนหน้า/ถัดไป
+    pageInfo.textContent = `หน้า ${currentPage} จาก ${totalPages}`;
+    prevBtn.disabled = (currentPage === 1);
+    nextBtn.disabled = (currentPage === totalPages);
 }
 
-let currentCorrectWord = ""; // สร้างตัวแปรมาเก็บคำตอบที่ถูกต้องไว้ตรวจ
+// ระบบปุ่มควบคุมการเปลี่ยนหน้า
+document.getElementById('prevPageBtn').addEventListener('click', () => {
+    if (currentPage > 1) {
+        currentPage--;
+        renderList();
+    }
+});
 
-// ฟังก์ชันสุ่มคำศัพท์ (อัปเดตใหม่)
+document.getElementById('nextPageBtn').addEventListener('click', () => {
+    const totalPages = Math.ceil(vocabData.length / rowsPerPage);
+    if (currentPage < totalPages) {
+        currentPage++;
+        renderList();
+    }
+});
+
+
+// --- ระบบมินิเกมสุ่มทายคำศัพท์ ---
+let currentCorrectWord = ""; 
+
 function pickRandomWord() {
-    if (vocabData.length === 0) return;
-    
+    if (vocabData.length === 0) {
+        document.getElementById('quizMeaning').textContent = "เพิ่มคำศัพท์ก่อนเริ่มเล่นทายคำน้า";
+        return;
+    }
     const randomIndex = Math.floor(Math.random() * vocabData.length);
     const randomItem = vocabData[randomIndex];
     
-    currentCorrectWord = randomItem.word; // เก็บคำศัพท์ไว้ตรวจ
+    currentCorrectWord = randomItem.word;
     
-    // สลับให้ด้านหน้าโชว์ความหมาย ด้านหลังโชว์คำศัพท์
     document.getElementById('quizMeaning').textContent = randomItem.meaning;
     document.getElementById('quizType').textContent = `(${randomItem.type})`;
     document.getElementById('quizWord').textContent = randomItem.word;
     
-    // รีเซ็ตการ์ดและช่องพิมพ์ให้พร้อมสำหรับคำถามใหม่
     document.getElementById('flipCard').classList.remove('flipped');
     document.getElementById('guessInput').value = "";
-    document.getElementById('guessInput').focus();
 }
 
-// จัดการเมื่อกดปุ่มสุ่มคำใหม่
 document.getElementById('randomBtn').addEventListener('click', pickRandomWord);
 
-// --- ลบระบบคลิกการ์ดเพื่อพลิกออกไป เพราะเราจะให้พลิกตอนตอบถูกเท่านั้น ---
-
-// ฟังก์ชันตรวจคำตอบ
 function checkAnswer() {
     const userGuess = document.getElementById('guessInput').value.trim().toLowerCase();
     const actualWord = currentCorrectWord.trim().toLowerCase();
@@ -66,28 +115,24 @@ function checkAnswer() {
     }
 
     if (userGuess === actualWord) {
-        // ตอบถูก!
         alert(`ปังมากกก! 🎉 ตอบถูกจ้า คำนั้นคือ "${currentCorrectWord}" เก่งเวอร์!`);
-        document.getElementById('flipCard').classList.add('flipped'); // พลิกป้ายโชว์เฉลย
+        document.getElementById('flipCard').classList.add('flipped');
     } else {
-        // ตอบผิด!
         alert("อุ๊ย ยังไม่ใช่น้าาา ลองคิดดูดีๆ อีกที สู้ๆ แกทำได้! ✌️");
-        document.getElementById('guessInput').focus(); // ให้เคอร์เซอร์กลับไปที่ช่องพิมพ์เพื่อแก้คำตอบ
+        document.getElementById('guessInput').focus();
     }
 }
 
-// กดปุ่มส่งคำตอบ
 document.getElementById('checkBtn').addEventListener('click', checkAnswer);
-
-// กด Enter ในช่องพิมพ์เพื่อส่งคำตอบได้เลย (เพิ่มความสะดวก)
 document.getElementById('guessInput').addEventListener('keypress', function(e) {
     if (e.key === 'Enter') {
-        e.preventDefault(); // ป้องกันฟอร์มรีเฟรช
+        e.preventDefault();
         checkAnswer();
     }
 });
 
-// จัดการฟอร์มเพิ่มคำศัพท์
+
+// --- ระบบฟอร์มเพิ่มคำศัพท์ ---
 document.getElementById('addWordForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
@@ -96,7 +141,6 @@ document.getElementById('addWordForm').addEventListener('submit', async (e) => {
     const meaning = document.getElementById('meaning').value;
     const statusMsg = document.getElementById('statusMsg');
 
-    // แสดงสถานะกำลังบันทึก
     statusMsg.textContent = "กำลังบันทึกข้อมูล...";
     statusMsg.classList.remove('hidden');
     statusMsg.style.color = "var(--text-muted)";
@@ -108,47 +152,39 @@ document.getElementById('addWordForm').addEventListener('submit', async (e) => {
             headers: { 'Content-Type': 'text/plain;charset=utf-8' } 
         });
         
-        // ซ่อนข้อความ "กำลังบันทึก" 
         statusMsg.classList.add('hidden');
         
-        // --- จุดที่เพิ่มใหม่: ให้หน้าต่างเด้งขึ้นมาบอก! ---
-// ซ่อนข้อความ "กำลังบันทึก" 
-        statusMsg.classList.add('hidden');
-        
-        // --- เริ่มระบบ ป๊อปอัป + นับคำ + จุดพลุ ---
-        
-        // คำนวณว่าเป็นคำที่เท่าไหร่ (เอาจำนวนคำที่มีอยู่เดิม + 1)
+        // คำนวณว่าเป็นคำที่เท่าไหร่
         const wordCount = vocabData.length + 1; 
 
-        // ดึงกล่อง Modal มาใช้งาน
         const modal = document.getElementById('successModal');
         const modalMsg = document.getElementById('modalMessage');
         
-        // ใส่ข้อความนับคำศัพท์เข้าไป
         modalMsg.innerHTML = `สำเร็จแล้ว! จำได้แน่แกกก<br>นี่คือ <strong>คำที่ ${wordCount}</strong> ของเราแล้วนะ!<br><br>คำศัพท์: <strong style="color: var(--primary-color); font-size: 1.3rem;">"${word}"</strong> ✌️✨`;
         
-        // โชว์ป๊อปอัป
         modal.classList.add('show');
         
-        // สั่งจุดพลุ Confetti!
+        // จุดพลุฉลอง
         confetti({
             particleCount: 150,
             spread: 70,
             origin: { y: 0.6 }
         });
 
-        // จัดการปุ่ม "ลุยต่อ!" เพื่อปิดป๊อปอัป
         document.getElementById('closeModalBtn').addEventListener('click', () => {
             modal.classList.remove('show');
         });
-        // --- จบระบบป๊อปอัป ---
 
-        // ล้างข้อมูลในฟอร์มและดึงข้อมูลใหม่มาแสดง
         document.getElementById('addWordForm').reset();
-        fetchData();
+        
+        // ดึงข้อมูลใหม่มาอัปเดตตารางทันที
+        fetchData(); 
         
     } catch (error) {
         statusMsg.textContent = "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง";
         statusMsg.style.color = "#F44336"; 
     }
 });
+
+// บังคับให้โหลดข้อมูลทันทีที่เปิดหน้าเว็บขึ้นมาครั้งแรก (แก้ปัญหาตารางว่าง)
+window.addEventListener('DOMContentLoaded', fetchData);

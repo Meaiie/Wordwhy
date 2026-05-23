@@ -226,3 +226,41 @@ tbody tr:last-child td { border-bottom: none; }
 .modal.show .modal-content {
     transform: translateY(0);
 }
+
+/* Pagination (ปุ่มเปลี่ยนหน้า) Styles */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1rem;
+    background-color: var(--bg-color);
+    border-top: 1px solid var(--border-color);
+}
+
+.btn-pagination {
+    padding: 0.4rem 1.2rem;
+    border: 1px solid var(--border-color);
+    background-color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.btn-pagination:hover:not(:disabled) {
+    background-color: #f0f0f0;
+    border-color: var(--text-muted);
+}
+
+.btn-pagination:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+#pageInfo {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
