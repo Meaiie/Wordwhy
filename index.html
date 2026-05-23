@@ -28,17 +28,23 @@
             <div class="flip-card" id="flipCard">
                 <div class="flip-card-inner">
                     <div class="flip-card-front">
-                        <p class="hint">คลิกเพื่อดูความหมาย</p>
-                        <h3 id="quizWord">Loading...</h3>
+                        <p class="hint">อ่านความหมายแล้วทายคำศัพท์นะ!</p>
+                        <h3 id="quizMeaning">Loading...</h3>
                         <span id="quizType"></span>
                     </div>
                     <div class="flip-card-back">
-                        <p class="hint">ความหมาย</p>
-                        <h3 id="quizMeaning">...</h3>
+                        <p class="hint">เฉลย</p>
+                        <h3 id="quizWord">...</h3>
                     </div>
                 </div>
             </div>
-            <button id="randomBtn" class="btn-secondary">สุ่มคำใหม่</button>
+            
+            <div style="margin-top: 1.5rem; display: flex; gap: 0.5rem; justify-content: center; max-width: 350px; margin: 1.5rem auto 0 auto;">
+                <input type="text" id="guessInput" placeholder="พิมพ์คำศัพท์ที่นี่..." style="flex: 1; padding: 0.6rem 1rem; border: 1px solid var(--border-color); border-radius: 8px;">
+                <button id="checkBtn" class="btn-primary">ส่งคำตอบ</button>
+            </div>
+
+            <button id="randomBtn" class="btn-secondary" style="margin-top: 1rem;">สุ่มคำใหม่</button>
         </section>
 
         <section class="card table-container">

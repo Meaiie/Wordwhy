@@ -28,27 +28,63 @@ function renderList() {
     `).join('');
 }
 
-// ฟังก์ชันสุ่มคำศัพท์
+let currentCorrectWord = ""; // สร้างตัวแปรมาเก็บคำตอบที่ถูกต้องไว้ตรวจ
+
+// ฟังก์ชันสุ่มคำศัพท์ (อัปเดตใหม่)
 function pickRandomWord() {
     if (vocabData.length === 0) return;
     
     const randomIndex = Math.floor(Math.random() * vocabData.length);
     const randomItem = vocabData[randomIndex];
     
-    document.getElementById('quizWord').textContent = randomItem.word;
-    document.getElementById('quizType').textContent = `(${randomItem.type})`;
-    document.getElementById('quizMeaning').textContent = randomItem.meaning;
+    currentCorrectWord = randomItem.word; // เก็บคำศัพท์ไว้ตรวจ
     
-    // รีเซ็ตการ์ดให้กลับมาหน้าแรกเสมอเมื่อสุ่มคำใหม่
+    // สลับให้ด้านหน้าโชว์ความหมาย ด้านหลังโชว์คำศัพท์
+    document.getElementById('quizMeaning').textContent = randomItem.meaning;
+    document.getElementById('quizType').textContent = `(${randomItem.type})`;
+    document.getElementById('quizWord').textContent = randomItem.word;
+    
+    // รีเซ็ตการ์ดและช่องพิมพ์ให้พร้อมสำหรับคำถามใหม่
     document.getElementById('flipCard').classList.remove('flipped');
+    document.getElementById('guessInput').value = "";
+    document.getElementById('guessInput').focus();
 }
 
 // จัดการเมื่อกดปุ่มสุ่มคำใหม่
 document.getElementById('randomBtn').addEventListener('click', pickRandomWord);
 
-// จัดการเมื่อคลิกที่การ์ดให้พลิกดูความหมาย
-document.getElementById('flipCard').addEventListener('click', function() {
-    this.classList.toggle('flipped');
+// --- ลบระบบคลิกการ์ดเพื่อพลิกออกไป เพราะเราจะให้พลิกตอนตอบถูกเท่านั้น ---
+
+// ฟังก์ชันตรวจคำตอบ
+function checkAnswer() {
+    const userGuess = document.getElementById('guessInput').value.trim().toLowerCase();
+    const actualWord = currentCorrectWord.trim().toLowerCase();
+
+    if (!userGuess) {
+        alert("พิมพ์คำศัพท์ก่อนตรวจน้าาา 🥺");
+        return;
+    }
+
+    if (userGuess === actualWord) {
+        // ตอบถูก!
+        alert(`ปังมากกก! 🎉 ตอบถูกจ้า คำนั้นคือ "${currentCorrectWord}" เก่งเวอร์!`);
+        document.getElementById('flipCard').classList.add('flipped'); // พลิกป้ายโชว์เฉลย
+    } else {
+        // ตอบผิด!
+        alert("อุ๊ย ยังไม่ใช่น้าาา ลองคิดดูดีๆ อีกที สู้ๆ แกทำได้! ✌️");
+        document.getElementById('guessInput').focus(); // ให้เคอร์เซอร์กลับไปที่ช่องพิมพ์เพื่อแก้คำตอบ
+    }
+}
+
+// กดปุ่มส่งคำตอบ
+document.getElementById('checkBtn').addEventListener('click', checkAnswer);
+
+// กด Enter ในช่องพิมพ์เพื่อส่งคำตอบได้เลย (เพิ่มความสะดวก)
+document.getElementById('guessInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault(); // ป้องกันฟอร์มรีเฟรช
+        checkAnswer();
+    }
 });
 
 // จัดการฟอร์มเพิ่มคำศัพท์
