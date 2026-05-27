@@ -108,17 +108,44 @@ document.getElementById('randomBtn').addEventListener('click', pickRandomWord);
 function checkAnswer() {
     const userGuess = document.getElementById('guessInput').value.trim().toLowerCase();
     const actualWord = currentCorrectWord.trim().toLowerCase();
+    
+    // ดึงกล่องป๊อปอัปที่เราสร้างไว้แล้วมาใช้งาน
+    const modal = document.getElementById('successModal');
+    const modalTitle = document.querySelector('#successModal h2'); // ดึงหัวข้อมาเปลี่ยนด้วย
+    const modalMsg = document.getElementById('modalMessage');
 
     if (!userGuess) {
-        alert("พิมพ์คำศัพท์ก่อนตรวจน้าาา 🥺");
+        alert("พิมพ์คำก่อนน้อง เบลอหรอคะ 🥺");
         return;
     }
 
     if (userGuess === actualWord) {
-        alert(`ปังมากกก! 🎉 ตอบถูกจ้า คำนั้นคือ "${currentCorrectWord}" เก่งเวอร์!`);
+        // --- กรณีตอบถูก ---
+        modalTitle.innerHTML = "🎉 เริ่ดดดดด ! 🎉";
+        modalMsg.innerHTML = `คำตอบของชีวิตเวอร์ เฉลยครืออ <br><strong style="color: var(--primary-color); font-size: 1.5rem;">"${currentCorrectWord}"</strong><br><br>โง่น้อยงงนิดนึง`;
+        
+        // โชว์ป๊อปอัป
+        modal.classList.add('show');
+        
+        // จุดพลุฉลอง
+        confetti({
+            particleCount: 150,
+            spread: 70,
+            origin: { y: 0.6 }
+        });
+
+        // พลิกการ์ดเฉลย
         document.getElementById('flipCard').classList.add('flipped');
+        
     } else {
-        alert("อุ๊ย ยังไม่ใช่น้าาา ลองคิดดูดีๆ อีกที สู้ๆ แกทำได้! ✌️");
+        // --- กรณีตอบผิด ---
+        modalTitle.innerHTML = "🥺 อุ๊ยยย...";
+        modalMsg.innerHTML = "ว้ายยย ง่าวแต๊ง่าวว่า<br><br>สู้ๆ เดี๋ยวก็ตายละ ✌️";
+        
+        // โชว์ป๊อปอัป (แบบไม่มีพลุ)
+        modal.classList.add('show');
+        
+        // คืนเคอร์เซอร์ไปที่ช่องพิมพ์ให้พิมพ์ใหม่
         document.getElementById('guessInput').focus();
     }
 }
@@ -160,7 +187,7 @@ document.getElementById('addWordForm').addEventListener('submit', async (e) => {
         const modal = document.getElementById('successModal');
         const modalMsg = document.getElementById('modalMessage');
         
-        modalMsg.innerHTML = `สำเร็จแล้ว! จำได้แน่แกกก<br>นี่คือ <strong>คำที่ ${wordCount}</strong> ของเราแล้วนะ!<br><br>คำศัพท์: <strong style="color: var(--primary-color); font-size: 1.3rem;">"${word}"</strong> ✌️✨`;
+        modalMsg.innerHTML = `จำไม่ได้ก็ลองเคี้ยว ๆ<br> <strong>คำที่ ${wordCount}</strong> แล้วกลืนลงท้องนะ<br><br>คำศัพท์: <strong style="color: var(--primary-color); font-size: 1.3rem;">"${word}"</strong> ✌️✨`;
         
         modal.classList.add('show');
         
