@@ -215,3 +215,16 @@ document.getElementById('addWordForm').addEventListener('submit', async (e) => {
 
 // บังคับให้โหลดข้อมูลทันทีที่เปิดหน้าเว็บขึ้นมาครั้งแรก (แก้ปัญหาตารางว่าง)
 window.addEventListener('DOMContentLoaded', fetchData);
+
+// --- ระบบปุ่มปิดป๊อปอัป (ส่วนกลาง) ---
+document.getElementById('closeModalBtn').onclick = function() {
+    // ซ่อนป๊อปอัป
+    document.getElementById('successModal').classList.remove('show');
+    
+    // แถม: เคลียร์ช่องทายคำศัพท์ให้ว่าง และพร้อมพิมพ์คำต่อไปได้เลย
+    const guessInput = document.getElementById('guessInput');
+    if (guessInput) {
+        guessInput.value = "";
+        guessInput.focus();
+    }
+};
